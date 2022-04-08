@@ -18,14 +18,40 @@ dom.ready(function() {
 	main.get   = new Loader
 	main.timer = new Timer(tick)
 	main.pan   = new Drag(main.vp)
+	
 
 	main.get.json('data/place-meta.json').defer.then(parseMeta)
-	main.get.buffer('data/2022_full.bin').defer.then(parseBinary)
+	
+	
+	main.binaryParts = [];
+	main.partIds = [1,2,3,4,5,6,7,8,9];
+	main.partIds.forEach(part => {
+		main.get.buffer(`data/2022_part_${part}.bin`).defer.then((buffer) => collectBinary(part, buffer))
+	})
 
 	main.bootTimer = new Timer(bootFunc).play()
 
 	main.get.ready(init)
 })
+
+function collectBinary(part, buffer){
+	main.binaryParts.push({part: part, buffer: buffer});
+	
+	console.log(`"part ${part} loaded`)
+	if(main.binaryParts.length == main.partIds.length){
+		let fullLength = main.binaryParts.map(x => x.buffer.byteLength).reduce((a, b) => a + b)
+		var full = new Uint8Array(fullLength);
+		
+		let pos=0;
+		main.binaryParts.sort((a,b) => a.part - b.part).forEach((x) => {
+			full.set(new Uint8Array(x.buffer), pos)
+			pos += x.buffer.byteLength
+			console.log(x.part)
+		})
+		
+		parseBinary(full.buffer)
+	}
+}
 
 function bootFunc() {
 	bootProgress(0.99 * main.get.bytesLoaded / main.get.bytesTotal)

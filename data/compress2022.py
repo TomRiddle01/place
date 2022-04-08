@@ -48,18 +48,30 @@ color_map = {
     '#D4D7D9': 31
 }
 
+
 file_order = [10,6,9,14,15,17,13,11,7,16,12,18,24,20,26,19,21,22,23,25,27,28,35,30,31,32,33,34,39,42,36,37,38,43,44,45,46,48,29,51,47,54,3,2,41,0,1,55,56,4,50,57,59,53,40,49,62,52,65,61,69,8,63,64,60,66,67,5,74,68,75,76,77,70,71,72,73,58]
+
 buffer = bytearray()
 
 def write_to_buffer(s):
     v = int(s, 2)
     buffer.append(v & 0xff)
 
+part = 1
+elements_count = 0
+
 for file_id in file_order:
     file = f"{data_dir}\\2022_place_canvas_history-{file_id:0>12}.csv/header.txt"
     print(f"compressing {file}", flush=True)
     
-    with open(file, newline='') as csvfile:    
+    if elements_count > 8:
+        part += 1
+        elements_count = 0
+        buffer = bytearray()
+    
+    with open(file, newline='') as csvfile:
+        elements_count += 1
+        
         reader = csv.reader(csvfile, delimiter=',', quotechar='"')
         
         i = 0
@@ -111,6 +123,6 @@ for file_id in file_order:
                     
     #print("converting and writing binary file", flush=True)
 
-    with open(bin_out, "wb") as out_file:
+    with open(f"2022_part_{part}.bin", "wb") as out_file:
         out_file.write(buffer)
                     
