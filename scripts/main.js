@@ -3,8 +3,8 @@ var main = {}
 dom.ready(function() {
 
 	main.scale = 1
-	main.sizeX = 1000
-	main.sizeY = 1000
+	main.sizeX = 2000
+	main.sizeY = 2000
 
 	main.vp    = dom.one('.viewport')
 	main.cvs   = dom.one('.place')
@@ -20,7 +20,7 @@ dom.ready(function() {
 	main.pan   = new Drag(main.vp)
 
 	main.get.json('data/place-meta.json').defer.then(parseMeta)
-	main.get.buffer('data/out.bin').defer.then(parseBinary)
+	main.get.buffer('data/2022_full.bin').defer.then(parseBinary)
 
 	main.bootTimer = new Timer(bootFunc).play()
 
@@ -177,7 +177,7 @@ function onwheel(e) {
 
 	var x = e.pageX - main.sizeX / 2
 	,   y = e.pageY - main.sizeY / 2
-	,   s = value > 0 ? 2 : 1/2
+	,   s = value > 0 ? 1.1 : 0.9
 
 	zoom(s, x, y)
 
@@ -238,21 +238,22 @@ function parseBinary(buffer) {
 	var hits = new DataView(buffer)
 	,   grid = f.rangep(main.sizeX * main.sizeY, 0, 0)
 
-	main.hitLength = hits.byteLength / 3
+	main.hitLength = hits.byteLength / 4
 	main.hitCoords = new Uint32Array(main.hitLength)
 	main.hitColors = new Uint8Array(main.hitLength)
 	main.hitBackwd = new Uint8Array(main.hitLength)
 
 	for(var i = 0; i < main.hitLength; i++) {
-		var o = i * 3
+		var o = i * 4
 
 		var b1 = hits.getUint8(o + 0, true)
 		,   b2 = hits.getUint8(o + 1, true)
 		,   b3 = hits.getUint8(o + 2, true)
+		,   b4 = hits.getUint8(o + 3, true)
 
-		var x = (b1 << 2) + (b2 >> 6)
-		,   y = ((b2 & 63 /* 0b00111111 */) << 4) + (b3 >> 4)
-		,   c = b3 & 15 /* 0b00001111 */
+		var x = (b1 << 3) + (b2 >> 5)
+		,   y = ((b2 & 31 /* 0b00011111 */) << 6) + (b3 >> 2)
+		,   c = b4
 		,   p = x + y * main.sizeX
 
 		main.hitColors[i] = c
