@@ -24,7 +24,7 @@ dom.ready(function() {
 	
 	
 	main.binaryParts = [];
-	main.partIds = [1,2,3,4,5,6,7,8,9];
+	main.partIds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 	main.partIds.forEach(part => {
 		main.get.buffer(`data/2022_part_${part}.bin`).defer.then((buffer) => collectBinary(part, buffer))
 	})
@@ -37,7 +37,7 @@ dom.ready(function() {
 function collectBinary(part, buffer){
 	main.binaryParts.push({part: part, buffer: buffer});
 	
-	console.log(`"part ${part} loaded`)
+	console.log(`part ${part} loaded`)
 	if(main.binaryParts.length == main.partIds.length){
 		let fullLength = main.binaryParts.map(x => x.buffer.byteLength).reduce((a, b) => a + b)
 		var full = new Uint8Array(fullLength);
